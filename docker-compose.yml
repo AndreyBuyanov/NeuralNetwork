@@ -1,0 +1,3 @@
+services:
+  neural-network:
+    build: https://github.com/AndreyBuyanov/NeuralNetwork.git
