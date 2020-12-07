@@ -126,10 +126,10 @@ public:
         // Проходим по вектору выходных ошибок
         for (std::size_t i = 0; i < outputError.Size(); i++) {
             // Аккумулируем половину квадрата текущего элемента
-            error += (outputError[i] * outputError[i]) / 2.0;
+            error += (outputError[i] * outputError[i]);
         }
         // Возвращаем общую ошибку
-        return error;
+        return error / outputError.Size();
     }
 private:
     // Ссылка на нейронную сеть
