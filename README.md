@@ -6,9 +6,13 @@ NeuralNetwork
 
 Сборка и запуск
 ---------------
+```bash
 cmake -S . -B build && cmake --build build --config RelWithDebInfo
+```
 
 Запуск в докере
 ---------------
+```bash
 docker build -t intelligent-systems/neural-network .
 docker run intelligent-systems/neural-network
+```
