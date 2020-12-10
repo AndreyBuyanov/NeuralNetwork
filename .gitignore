@@ -1,3 +1,6 @@
+.idea
+cmake-build-debug
+cmake-build-relwithdebinfo
 bin
 build
 lib
