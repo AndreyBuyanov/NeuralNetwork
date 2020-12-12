@@ -48,10 +48,13 @@ public:
         // попутно запоминая выходные значения каждого слоя
         // TODO: Реализовать прямой проход одним циклом
         // Проходим по первому слою, подавая на вход вектор входных данных
-        m_outputs[0] = m_nn.Forward(input, 0);
+        m_outputs[0] = m_nn.Forward(
+            NeuralNetwork::VectorWithBias(input, m_nn.m_layers[0].bias), 0);
         // Проходим по остальным слоям
         for (std::size_t i = 1; i < m_nn.LayersCount(); i++) {
-            m_outputs[i] = m_nn.Forward(m_outputs[i - 1], i);
+            m_outputs[i] = m_nn.Forward(
+                NeuralNetwork::VectorWithBias(
+                    m_outputs[i - 1], m_nn.m_layers[i - 1].bias), i);
         }
 
         // Для удобства запомним индекс последнего слоя
@@ -73,7 +76,8 @@ public:
             // Вектор величин корректировки - это произведение вектора выходов предыдущего слоя,
             // градиента текущего нейрона и скорости обучения.
             // Уменьшаем вектор весов текущего нейрона на вектор с величинами корректировки
-            m_nn.m_weights[lastLayerIndex][i] -= m_outputs[lastLayerIndex - 1]
+            m_nn.m_weights[lastLayerIndex][i] -= NeuralNetwork::VectorWithBias(
+                    m_outputs[lastLayerIndex - 1], m_nn.m_layers[lastLayerIndex - 1].bias)
                 * m_gradients[lastLayerIndex][i] * m_learningRate;
         }
 
@@ -83,7 +87,7 @@ public:
             // Посчитаем вектор ошибок текущего слоя - это произведение
             // транспонированной матрицы весов следующего слоя
             // и вектора градиентов следующего слоя
-            auto currentLayerError = (m_nn.m_weights[currentLayerIndex + 1].Transpose())
+            auto currentLayerError = (MakeWeightsWithoutBias(m_nn.m_weights[currentLayerIndex + 1]).Transpose())
                 * m_gradients[currentLayerIndex + 1];
             // Посчитаем градиенты на текущем слое.
             // Вектор градиентов текущего слоя - это произведение
@@ -96,7 +100,8 @@ public:
                 // Вектор величин корректировки - это произведение вектора выходов предыдущего слоя,
                 // градиента текущего нейрона и скорости обучения.
                 // Уменьшаем вектор весов текущего нейрона на вектор с величинами корректировки
-                m_nn.m_weights[currentLayerIndex][i] -= m_outputs[currentLayerIndex - 1]
+                m_nn.m_weights[currentLayerIndex][i] -= NeuralNetwork::VectorWithBias(
+                        m_outputs[currentLayerIndex - 1], m_nn.m_layers[currentLayerIndex].bias)
                     * m_gradients[currentLayerIndex][i] * m_learningRate;
             }
         }
@@ -104,7 +109,7 @@ public:
         // Посчитаем вектор ошибок первого слоя - это произведение
         // транспонированной матрицы весов следующего слоя
         // и вектора градиентов следующего слоя
-        auto inputLayerError = (m_nn.m_weights[1].Transpose())
+        auto inputLayerError = (MakeWeightsWithoutBias(m_nn.m_weights[1]).Transpose())
             * m_gradients[1];
         // Посчитаем градиенты на первом слое.
         // Вектор градиентов первого слоя - это произведение
@@ -117,7 +122,7 @@ public:
             // Вектор величин корректировки - это произведение вектора входных данных,
             // градиента текущего нейрона и скорости обучения.
             // Уменьшаем вектор весов текущего нейрона на вектор с величинами корректировки
-            m_nn.m_weights[0][i] -= input
+            m_nn.m_weights[0][i] -= NeuralNetwork::VectorWithBias(input, m_nn.m_layers[0].bias)
                 * m_gradients[0][i] * m_learningRate;
         }
         // Обратный проход завершён
@@ -165,6 +170,17 @@ private:
                 }
             }
         }
+    }
+
+    static Matrix MakeWeightsWithoutBias(const Matrix& input)
+    {
+        Matrix result(input.Rows(), input.Cols() - 1);
+        for (std::size_t row = 0; row < result.Rows(); row++) {
+            for (std::size_t col = 0; col < result.Cols(); col++) {
+                result[row][col] = input[row][col];
+            }
+        }
+        return result;
     }
 };
 

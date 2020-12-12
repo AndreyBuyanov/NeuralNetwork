@@ -45,8 +45,8 @@ int main (int argc, char *argv[]){
 #endif
     // Нейронная сеть
     NN::NeuralNetwork nn(2, {                   // 2 входа
-        {2, NN::ActivationFunction::Sigmoid },  // Скрытый слой: 2 нейрона, функция активации - сигмоида
-        {1, NN::ActivationFunction::Sigmoid }   // Выходной слой: 1 нейрон, функция активации - сигмоида
+        {2, NN::ActivationFunction::Sigmoid, 1.0 },  // Скрытый слой: 2 нейрона, функция активации - сигмоида
+        {1, NN::ActivationFunction::Sigmoid, 1.0 }   // Выходной слой: 1 нейрон, функция активации - сигмоида
     });
     // Обучатель нейронной сети
     NN::NeuralNetworkTrainer nnTrainer(nn, learningRate);

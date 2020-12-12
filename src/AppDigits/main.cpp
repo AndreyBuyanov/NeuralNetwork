@@ -153,10 +153,10 @@ int main (int argc, char *argv[]){
     SetConsoleOutputCP(65001);
 #endif
     // Нейронная сеть
-    NN::NeuralNetwork nn(35, {                      // 35 входов
-        { 35, NN::ActivationFunction::Sigmoid },    // Скрытый слой: 35 нейронов, функция активации - сигмоида
-        { 35, NN::ActivationFunction::Sigmoid },    // Скрытый слой: 35 нейронов, функция активации - сигмоида
-        { 10, NN::ActivationFunction::Sigmoid }     // Выходной слой: 10 нейронов, функция активации - сигмоида
+    NN::NeuralNetwork nn(35, {                               // 35 входов
+        { 35, NN::ActivationFunction::Sigmoid, 1.0 },    // Скрытый слой: 35 нейронов, функция активации - сигмоида
+        { 35, NN::ActivationFunction::Sigmoid, 1.0 },    // Скрытый слой: 35 нейронов, функция активации - сигмоида
+        { 10, NN::ActivationFunction::Sigmoid, 1.0 }     // Выходной слой: 10 нейронов, функция активации - сигмоида
     });
     // Обучатель нейронной сети
     NN::NeuralNetworkTrainer nnTrainer(nn, learningRate);

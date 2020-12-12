@@ -17,6 +17,8 @@ struct LayerConfig
     std::size_t neurons;
     // Тип функции активации
     ActivationFunction fn;
+    // Значение нейрона смещения
+    double bias;
 };
 
 /**
@@ -41,13 +43,13 @@ public:
         // Веса первого слоя - это матрица, имеющая количество строк,
         // равное количеству нейронов первого слоя,
         // и количество столбцов, равное количеству входов
-        m_weights[0] = Matrix(layers[0].neurons, inputs);
+        m_weights[0] = Matrix(layers[0].neurons, inputs + 1);
         // Проходим по остальным слоям
         for (std::size_t i = 1; i < layers.size(); i++) {
             // Веса текущего слоя - это матрица, имеющая количество строк,
             // равное количеству нейронов текущего слоя,
             // и количество столбцов, равное количеству нейронов предыдущего слоя
-            m_weights[i] = Matrix(layers[i].neurons, layers[i - 1].neurons);
+            m_weights[i] = Matrix(layers[i].neurons, layers[i - 1].neurons + 1);
         }
     }
     /**
@@ -71,12 +73,12 @@ public:
         // Проходим по первому слою, подав на него входной вектор
         // В output получим выход первого слоя,
         // и это будет входом следующего слоя
-        auto output = Forward(input, 0);
+        auto output = Forward(VectorWithBias(input, m_layers[0].bias), 0);
         // Проходим по остальным слоям
         for (std::size_t i = 1; i < m_weights.size(); i++) {
             // Сейчас в output хранится выходной вектор предыдущего слоя
             // Подадим output на вход текущего слоя
-            output = Forward(output, i);
+            output = Forward(VectorWithBias(output, m_layers[i].bias), i);
             // Теперь в output выход текущего слоя
         }
         // Прошли по всем слоям, значит в output выход последнего слоя.
@@ -102,6 +104,16 @@ private:
         // К получившемуся вектору применим функцию активации
         // Вернём получившийся вектор
         return (m_weights[layer] * input).ApplyFunction(GetFunction(m_layers[layer].fn));
+    }
+
+    static Vector VectorWithBias(const Vector& vector, const double bias)
+    {
+        Vector result(vector.Size() + 1);
+        for (std::size_t i = 0; i < vector.Size(); ++i) {
+            result[i] = vector[i];
+        }
+        result[result.Size() - 1] = bias;
+        return result;
     }
 
     friend class NeuralNetworkTrainer;
