@@ -143,7 +143,7 @@ public:
      *
      * \param v1 Первый вектор
      * \param v2 Второй вектор
-     * \return Разность векторов
+     * \return Сумма векторов
      */
     friend Vector operator + (const Vector& v1, const Vector& v2) noexcept(false)
     {
@@ -155,7 +155,7 @@ public:
         Vector result(v1.Size());
         // Проходим по элементам векторов
         for (std::size_t index = 0; index < v1.Size(); ++index) {
-            // Сохраняем в текущем элементе результата разность векторов
+            // Сохраняем в текущем элементе результата сумму векторов
             result[index] = v1[index] + v2[index];
         }
         // Возвращаем результат
