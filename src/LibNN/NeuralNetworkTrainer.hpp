@@ -21,9 +21,14 @@ public:
      * \param nn Нейронная сеть для обучения
      * \param learningRate Скорость обучения
      */
-    NeuralNetworkTrainer(NeuralNetwork& nn, const double learningRate):
+    NeuralNetworkTrainer(
+        NeuralNetwork& nn,
+        const double learningRate,
+        const double momentum):
         m_nn(nn),                       // Сохраняем ссылку на нейронную сеть
-        m_learningRate(learningRate)    // Сохраняем скорость обучения
+        m_learningRate(learningRate),   // Сохраняем скорость обучения
+        m_momentum(momentum),           //
+        m_vx(nn.LayersCount())          //
     {
         // Количество элементов в массиве выходных значений
         // должно соответствовать количеству слоёв
@@ -33,6 +38,12 @@ public:
         m_gradients.resize(m_nn.LayersCount());
         // Инициализируем нейронную сеть случайными значениями
         Init();
+        for(std::size_t layer = 0; layer < nn.LayersCount(); layer++) {
+            m_vx[layer] = Vector(nn.m_layers[layer].neurons);
+            for(std::size_t index; index < m_vx[layer].Size(); index++){
+                m_vx[layer][index] = 0.0;
+            }
+        }
     }
     /**
      * Обучение нейронной сети
@@ -69,6 +80,7 @@ public:
         // от выходного вектора последнего слоя
         m_gradients[lastLayerIndex] = outputError
             * (m_outputs[lastLayerIndex].ApplyFunction(GetFunctionDerivative(m_nn.m_layers[lastLayerIndex].fn)));
+        m_vx[lastLayerIndex] = m_momentum * m_vx[lastLayerIndex] + m_gradients[lastLayerIndex];
         // Корректируем веса на последнем слое
         // Строка матрицы весов - это веса отдельного нейрона
         // Проходим по весам каждого нейрона последнего слоя
@@ -78,7 +90,7 @@ public:
             // Уменьшаем вектор весов текущего нейрона на вектор с величинами корректировки
             m_nn.m_weights[lastLayerIndex][i] -= NeuralNetwork::VectorWithBias(
                     m_outputs[lastLayerIndex - 1], m_nn.m_layers[lastLayerIndex - 1].bias)
-                * m_gradients[lastLayerIndex][i] * m_learningRate;
+                * m_vx[lastLayerIndex][i] * m_learningRate;
         }
 
         // Проходим по другим слоям, от большего к меньшему, те двигаемся обратно,
@@ -95,6 +107,7 @@ public:
             // от выходного вектора текущего слоя
             m_gradients[currentLayerIndex] = currentLayerError
                 * (m_outputs[currentLayerIndex].ApplyFunction(GetFunctionDerivative(m_nn.m_layers[currentLayerIndex].fn)));
+            m_vx[currentLayerIndex] = m_momentum * m_vx[currentLayerIndex] + m_gradients[currentLayerIndex];
             // Проходим по весам каждого нейрона текущего слоя
             for (std::size_t i = 0; i < m_nn.m_weights[currentLayerIndex].Rows(); i++) {
                 // Вектор величин корректировки - это произведение вектора выходов предыдущего слоя,
@@ -102,7 +115,7 @@ public:
                 // Уменьшаем вектор весов текущего нейрона на вектор с величинами корректировки
                 m_nn.m_weights[currentLayerIndex][i] -= NeuralNetwork::VectorWithBias(
                         m_outputs[currentLayerIndex - 1], m_nn.m_layers[currentLayerIndex].bias)
-                    * m_gradients[currentLayerIndex][i] * m_learningRate;
+                    * m_vx[currentLayerIndex][i] * m_learningRate;
             }
         }
 
@@ -117,13 +130,14 @@ public:
         // от выходного вектора первого слоя
         m_gradients[0] = inputLayerError
             * (m_outputs[0].ApplyFunction(GetFunctionDerivative(m_nn.m_layers[0].fn)));
+        m_vx[0] = m_momentum * m_vx[0] + m_gradients[0];
         // Проходим по весам каждого нейрона первого слоя
         for (std::size_t i = 0; i < m_nn.m_weights[0].Rows(); i++) {
             // Вектор величин корректировки - это произведение вектора входных данных,
             // градиента текущего нейрона и скорости обучения.
             // Уменьшаем вектор весов текущего нейрона на вектор с величинами корректировки
             m_nn.m_weights[0][i] -= NeuralNetwork::VectorWithBias(input, m_nn.m_layers[0].bias)
-                * m_gradients[0][i] * m_learningRate;
+                * m_vx[0][i] * m_learningRate;
         }
         // Обратный проход завершён
         // Посчитаем общую ошибку. Это будет среднеквадратичная ошибка.
@@ -141,6 +155,10 @@ private:
     NeuralNetwork& m_nn;
     // Скорость обучения
     double m_learningRate;
+    //
+    double m_momentum;
+    //
+    std::vector<Vector> m_vx;
     // Массив векторов, содержащий выходные данные слоёв
     std::vector<Vector> m_outputs;
     // Массив векторов, содержащий градиенты слоёв

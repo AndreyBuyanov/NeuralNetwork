@@ -34,6 +34,8 @@ std::vector<NN::Vector> Y = {
 const std::size_t epochs = 1000000;
 // Скорость обучения
 const double learningRate = 0.5;
+//
+const double momentum = 0.5;
 // Минимальная ошибка
 const double epsilon = 1e-5;
 
@@ -49,7 +51,7 @@ int main (int argc, char *argv[]){
         {1, NN::ActivationFunction::Sigmoid, 1.0 }   // Выходной слой: 1 нейрон, функция активации - сигмоида
     });
     // Обучатель нейронной сети
-    NN::NeuralNetworkTrainer nnTrainer(nn, learningRate);
+    NN::NeuralNetworkTrainer nnTrainer(nn, learningRate, momentum);
 
     // Начальная эпоха
     std::size_t epoch = 1;

@@ -140,11 +140,13 @@ std::vector<NN::Vector> Y = {
 };
 
 // Максимальное количество эпох
-const std::size_t epochs = 500000;
+const std::size_t epochs = 1000000;
 // Скорость обучения
 const double learningRate = 0.5;
+//
+const double momentum = 0.5;
 // Минимальная ошибка
-const double epsilon = 1e-5;
+const double epsilon = 1e-6;
 
 // TODO: Добавить возможность задавать параметры сети из командной строки
 int main (int argc, char *argv[]){
@@ -155,11 +157,10 @@ int main (int argc, char *argv[]){
     // Нейронная сеть
     NN::NeuralNetwork nn(35, {                               // 35 входов
         { 35, NN::ActivationFunction::Sigmoid, 1.0 },    // Скрытый слой: 35 нейронов, функция активации - сигмоида
-        { 35, NN::ActivationFunction::Sigmoid, 1.0 },    // Скрытый слой: 35 нейронов, функция активации - сигмоида
         { 10, NN::ActivationFunction::Sigmoid, 1.0 }     // Выходной слой: 10 нейронов, функция активации - сигмоида
     });
     // Обучатель нейронной сети
-    NN::NeuralNetworkTrainer nnTrainer(nn, learningRate);
+    NN::NeuralNetworkTrainer nnTrainer(nn, learningRate, momentum);
 
     // Начальная эпоха
     std::size_t epoch = 1;

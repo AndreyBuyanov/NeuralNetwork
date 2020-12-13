@@ -137,6 +137,31 @@ public:
         return v * value;
     }
     /**
+     * Сложение векторов.
+     * Пример:
+     * [a1, a2, a3] + [b1, b2, b3] = [a1+b1, a2+b2, a3+b3]
+     *
+     * \param v1 Первый вектор
+     * \param v2 Второй вектор
+     * \return Разность векторов
+     */
+    friend Vector operator + (const Vector& v1, const Vector& v2) noexcept(false)
+    {
+        // Вектора должны быть одинакового размера
+        if (v1.Size() != v2.Size()) {
+            throw std::out_of_range("Vectors must be the same size");
+        }
+        // Результат
+        Vector result(v1.Size());
+        // Проходим по элементам векторов
+        for (std::size_t index = 0; index < v1.Size(); ++index) {
+            // Сохраняем в текущем элементе результата разность векторов
+            result[index] = v1[index] + v2[index];
+        }
+        // Возвращаем результат
+        return result;
+    }
+    /**
      * Вычитание векторов.
      * Пример:
      * [a1, a2, a3] - [b1, b2, b3] = [a1-b1, a2-b2, a3-b3]
