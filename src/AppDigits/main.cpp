@@ -161,15 +161,17 @@ int main (int argc, char *argv[]){
     });
     // Обучатель нейронной сети
     NN::NeuralNetworkTrainer nnTrainer(nn, learningRate, momentum);
-
-    // Начальная эпоха
-    std::size_t epoch = 1;
-    // Текущая ошибка сети
-    double error = 0.0;
     // Генератор случайных чисел
     std::random_device rd;
     // Движок генерации случайных чисел
     std::mt19937 rng(rd());
+    rng.seed(1);
+    // Инициализируем веса нейронной сети
+    nnTrainer.Init(-0.5, 0.5, rng);
+    // Начальная эпоха
+    std::size_t epoch = 1;
+    // Текущая ошибка сети
+    double error = 0.0;
     // Нормальное распределение от 0 до 9 (количество входных\выходных данных)
     std::uniform_int_distribution<std::size_t> ds(0, X.size() - 1);
     // Запускаем цикл обучения

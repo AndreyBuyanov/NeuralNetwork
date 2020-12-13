@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <random>
-
 #include "NeuralNetwork.hpp"
 
 namespace NN
@@ -36,8 +34,6 @@ public:
         // Количество элементов в массиве градиентов
         // должно соответствовать количеству слоёв
         m_gradients.resize(m_nn.LayersCount());
-        // Инициализируем нейронную сеть случайными значениями
-        Init();
         for(std::size_t layer = 0; layer < nn.LayersCount(); layer++) {
             m_vx[layer] = Vector(nn.m_layers[layer].neurons);
             m_vx[layer] = 0.0;
@@ -148,6 +144,28 @@ public:
         // Возвращаем общую ошибку
         return error / outputError.Size();
     }
+    /**
+     * Инициализация весов нейронной сети.
+     *
+     * \return
+     */
+    template<class Engine>
+    void Init(const double minValue, const double maxValue, Engine& engine)
+    {
+        // Равномерное распределение в диапазоне от -0.5 до 0.5
+        std::uniform_real_distribution<double> ds(minValue, maxValue);
+        // Проходим по матрицам весов каждого слоя
+        for (std::size_t layer = 0; layer < m_nn.LayersCount(); layer++) {
+            // Проходим по строкам матрицы весов текущего слоя
+            for (std::size_t row = 0; row < m_nn.m_weights[layer].Rows(); row++) {
+                // Проходим по столбцам матрицы весов текущего слоя
+                for (std::size_t col = 0; col < m_nn.m_weights[layer].Cols(); col++) {
+                    // Инициализируем текущий вес случайным значением
+                    m_nn.m_weights[layer][row][col] = ds(engine);
+                }
+            }
+        }
+    }
 private:
     // Ссылка на нейронную сеть
     NeuralNetwork& m_nn;
@@ -161,32 +179,6 @@ private:
     std::vector<Vector> m_outputs;
     // Массив векторов, содержащий градиенты слоёв
     std::vector<Vector> m_gradients;
-
-    /**
-     * Инициализация весов нейронной сети.
-     *
-     * \return 
-     */
-    void Init()
-    {
-        // Генератор случайных чисел
-        std::random_device rd;
-        // Движок для генерации случайных чисел
-        std::mt19937 rng(rd());
-        // Равномерное распределение в диапазоне от -0.5 до 0.5
-        std::uniform_real_distribution<double> ds(-0.5, 0.5);
-        // Проходим по матрицам весов каждого слоя
-        for (std::size_t layer = 0; layer < m_nn.LayersCount(); layer++) {
-            // Проходим по строкам матрицы весов текущего слоя
-            for (std::size_t row = 0; row < m_nn.m_weights[layer].Rows(); row++) {
-                // Проходим по столбцам матрицы весов текущего слоя
-                for (std::size_t col = 0; col < m_nn.m_weights[layer].Cols(); col++) {
-                    // Инициализируем текущий вес случайным значением
-                    m_nn.m_weights[layer][row][col] = ds(rng);
-                }
-            }
-        }
-    }
 
     static Matrix MakeWeightsWithoutBias(const Matrix& input)
     {
