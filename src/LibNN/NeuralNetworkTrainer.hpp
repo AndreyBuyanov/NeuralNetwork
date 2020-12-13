@@ -40,9 +40,7 @@ public:
         Init();
         for(std::size_t layer = 0; layer < nn.LayersCount(); layer++) {
             m_vx[layer] = Vector(nn.m_layers[layer].neurons);
-            for(std::size_t index; index < m_vx[layer].Size(); index++){
-                m_vx[layer][index] = 0.0;
-            }
+            m_vx[layer] = 0.0;
         }
     }
     /**

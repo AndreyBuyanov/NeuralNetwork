@@ -48,6 +48,18 @@ public:
         return m_vector[index];
     }
     /**
+     *
+     * \param value
+     * \return
+     */
+    Vector& operator = (const double value)
+    {
+        for (std::size_t index = 0; index < Size(); ++index) {
+            m_vector[index] = value;
+        }
+        return (*this);
+    }
+    /**
      * Получение размера вектора.
      *
      * \return Размер вектора
